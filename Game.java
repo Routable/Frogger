@@ -1,0 +1,278 @@
+public class Game
+{
+    private Grid grid;
+    private int userRow;
+    private int userCol;
+    private int msElapsed;
+    private int timesGet;
+    private int timesAvoid;
+
+    private int carCol;
+    private int carRow;
+    private String userImage;
+    private String fruit;
+    private String car1;
+    private String car2;
+    private String car3; 
+    private String car4; 
+    private boolean fruitSpawn;
+    private boolean goFaster;
+
+    public Game()
+    {
+        grid = new Grid(5, 10);
+        userRow = 3; //location of the U
+        userCol = 5;
+        userImage = "frog.gif";
+        fruit = "cherry.gif";
+        car1 = "car.gif";
+        car2 = "car2.gif";
+        car3= "car3.gif";
+        car4= "car4.gif";
+        goFaster = false; 
+
+        carRow = 0;
+        carCol = 0;
+
+        msElapsed = 0; //total time lapsed
+        timesGet = 0; //total amount of things collected
+        timesAvoid = 0; //total times hit by avoidable objects
+        updateTitle();
+        grid.setImage(new Location(userRow, userCol), userImage);
+    }
+
+    public void play()
+    {
+        while (!isGameOver())
+        {
+            grid.pause(100);
+            handleKeyPress();
+
+            if (msElapsed % 400 == 0) 
+            {
+                scrollLeft();
+                populateRightEdge();
+                spawn();
+            }
+
+            if(getScore() > 10000 && getScore() <20000 && msElapsed % 300 == 0) {
+
+                scrollLeft();
+                populateRightEdge();
+                spawn();
+            }
+
+            if(getScore() > 20000 && getScore() <30000 && msElapsed % 200 == 0) {
+
+                scrollLeft();
+                populateRightEdge();
+                spawn();
+            }
+
+            if(getScore() > 30000 && msElapsed % 100 == 0) {
+                scrollLeft();
+                populateRightEdge();
+                spawn();
+            }
+
+            updateTitle();
+            msElapsed += 100;
+        }
+    }
+
+    //Movements
+    public void handleKeyPress()
+    {
+        int key = grid.checkLastKeyPressed();
+
+        //up arrow
+        if(key == 38 && userRow > 0){
+            handleCollision(new Location(userRow-1, userCol));
+            grid.setImage(new Location(userRow, userCol), null);
+            userRow--;
+            grid.setImage(new Location(userRow, userCol), userImage);
+        }
+        //down arrow
+
+        if(key == 40 && userRow < 4){
+            handleCollision(new Location(userRow+1, userCol));
+            grid.setImage(new Location(userRow, userCol), null);
+            userRow++;
+            grid.setImage(new Location(userRow, userCol), userImage);
+        }
+
+        //left arrow
+
+        if(key == 37 && userCol > 0){
+            handleCollision(new Location(userRow, userCol-1));
+            grid.setImage(new Location(userRow, userCol), null);
+            userCol--;
+            grid.setImage(new Location(userRow, userCol), userImage);
+        }
+        //right arrow
+
+        if(key == 39 && userCol < 9){
+            handleCollision(new Location(userRow, userCol+1));
+            grid.setImage(new Location(userRow, userCol), null);
+            userCol++;
+            grid.setImage(new Location(userRow, userCol), userImage);
+        }
+
+    }
+
+    public void populateRightEdge()
+    {
+        int rand = (int)(Math.random() * 100 + 1);
+        grid.setImage(new Location(carRow, carCol), null);
+
+        carRow = (int)(Math.random() * grid.getNumRows());
+        carCol = grid.getNumCols() -1;
+
+        if(rand > 20 && rand < 40) {
+            grid.setImage(new Location(carRow, carCol), car1);
+        }
+
+        if(rand > 60 && rand < 80) {
+            grid.setImage(new Location(carRow, carCol), car2);
+        }
+        
+        if(rand > 40 && rand < 60) {
+            grid.setImage(new Location(carRow, carCol), car3);
+        }
+        
+        if(rand > 80 && rand < 100) {
+            grid.setImage(new Location(carRow, carCol), car4);
+        }
+
+    }
+
+    public void scrollLeft()
+    {
+
+        int boardRow = grid.getNumRows();
+        int boardCol = grid.getNumCols();
+
+        if(userCol < 9) {
+            handleCollision(new Location(userRow, userCol+1));
+        }else {
+            handleCollision(new Location(userRow, userCol));
+        }
+
+        for(int i = 0; i < boardRow; i++){
+            for(int k = 0; k < boardCol; k++){
+
+                Location testGet = new Location(i,k);
+
+                if((grid.getImage(testGet) != null && (grid.getImage(testGet) != userImage && grid.getImage(testGet) != fruit && grid.getImage(testGet) != car2 && grid.getImage(testGet) != car3 && grid.getImage(testGet) != car4))){
+                    grid.setImage(testGet, null);
+
+                    if(k > 0) {
+
+                        grid.setImage(new Location(i,k -1), car1);
+                    }
+                }
+
+                if((grid.getImage(testGet) != null && (grid.getImage(testGet) != userImage && grid.getImage(testGet) != fruit && grid.getImage(testGet) != car1 && grid.getImage(testGet) != car3 && grid.getImage(testGet) != car4))){
+                    grid.setImage(testGet, null);
+
+                    if(k > 0) {
+
+                        grid.setImage(new Location(i,k -1), car2);
+                    }
+                }
+
+                if((grid.getImage(testGet) != null && (grid.getImage(testGet) != userImage && grid.getImage(testGet) != fruit && grid.getImage(testGet) != car1 && grid.getImage(testGet) != car2 && grid.getImage(testGet) != car4))){
+                    grid.setImage(testGet, null);
+
+                    if(k > 0) {
+
+                        grid.setImage(new Location(i,k -1), car3);
+                    }
+                }
+
+                if((grid.getImage(testGet) != null && (grid.getImage(testGet) != userImage && grid.getImage(testGet) != fruit && grid.getImage(testGet) != car1 && grid.getImage(testGet) != car2 && grid.getImage(testGet) != car3))){
+                    grid.setImage(testGet, null);
+
+                    if(k > 0) {
+
+                        grid.setImage(new Location(i,k -1), car4);
+                    }
+                }
+
+                
+            }
+            grid.setImage(new Location(userRow, userCol), userImage);
+        }
+    }
+
+    public void spawn() {
+        int rand = (int)(Math.random() * 100 + 1);
+
+        if(rand > 75) {
+
+            int randRow = (int)(Math.random() * grid.getNumRows());
+            int randCol = (int)(Math.random() * grid.getNumCols() -1);
+            grid.setImage(new Location(randRow, randCol), "cherry.gif");
+
+        }
+
+    }
+
+    public void handleCollision(Location loc)
+    {
+        String hc = grid.getImage(loc);    
+
+        if(hc != null && hc.equals("car.gif") || hc != null && hc.equals("car2.gif") || hc != null && hc.equals("car3.gif")|| hc != null && hc.equals("car4.gif") ){
+            grid.setImage(loc, null);
+            timesAvoid++;
+
+        }
+        
+        if(hc != null && hc.equals("cherry.gif")){
+            grid.setImage(loc, null);
+            fruitSpawn = true;
+            timesGet++;
+        }
+
+    }
+
+    public int getScore()
+    {
+        int score = 0;
+        score = timesGet * 1000;
+        score += (msElapsed / 10);
+        return score;
+    }
+
+    public void updateTitle()
+    {
+        grid.setTitle("Frogger: Score: " + getScore());
+
+        if(timesAvoid == 1){
+            grid.setTitle("You were run over!  Score: " + getScore());
+        }
+    }
+
+    public boolean isGameOver()
+    {
+        if(timesAvoid == 1){
+            return true;
+        }
+        else{
+            return false;
+        }
+
+    }
+
+    public static void test()
+    {
+        Game game = new Game();
+        game.play();
+    }
+
+    public static void main(String[] args)
+    {
+        test();
+    }
+}
+
